@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"API/models"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,10 +19,10 @@ func ConnectDatabase() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err = db.AutoMigrate(&models.User{}); err != nil {
-		log.Println(err)
-		return nil, err
-	}
+	// if err = db.AutoMigrate(&models.User{}); err != nil {
+	// 	log.Println(err)
+	// 	return nil, err
+	// }
 	DB = db
 	return DB, nil
 }

@@ -7,4 +7,5 @@ import (
 
 func SyncDatabase() {
 	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.Post{})
 }

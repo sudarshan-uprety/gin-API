@@ -19,6 +19,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	routers.UserRoutes(router)
+	routers.PostRoutes(router)
 	err := router.Run(":8000")
 	if err != nil {
 		panic(err)
