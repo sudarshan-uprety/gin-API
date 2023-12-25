@@ -11,4 +11,5 @@ type User struct {
 	Phone    string `json:"phone" binding:"required"`
 	Email    string `json:"email" gorm:"unique" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	// Posts    []Post
 }

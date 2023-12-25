@@ -4,16 +4,17 @@ import (
 	"API/database"
 	"API/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetPosts() gin.HandlerFunc {
+func GetAllPosts() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var posts []models.Post
-		if err := database.DB.Where("visiblity = ?", true).Find(&posts).Error; err != nil {
+		if err := database.DB.Preload("User").Where("visiblity = ?", true).Find(&posts).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to fetch visible posts",
+				"error": err.Error(),
 			})
 			return
 		}
@@ -21,6 +22,29 @@ func GetPosts() gin.HandlerFunc {
 			"posts": posts,
 		})
 
+	}
+}
+
+func GetPosts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var posts []models.Post
+		userIdStr := c.Param("id")
+		userID, err := strconv.ParseUint(userIdStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if err := database.DB.Preload("User").Where("visiblity = ? AND user_id = ?", true, userID).Find(&posts).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusAccepted, gin.H{
+			"data": posts,
+		})
 	}
 }
 
