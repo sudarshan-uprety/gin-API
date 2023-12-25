@@ -101,6 +101,17 @@ func UpdatePost() gin.HandlerFunc {
 			})
 			return
 		}
+		user, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+			return
+		}
+		if user.(models.User).ID != post.UserID {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "This post doesnot belongs to you.",
+			})
+			return
+		}
 
 		if err := database.DB.Save(&post).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -127,9 +138,20 @@ func DeletePost() gin.HandlerFunc {
 			})
 			return
 		}
+		user, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+			return
+		}
 		if err := database.DB.Where("id = ?", PostID).Find(&post).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
+			})
+			return
+		}
+		if user.(models.User).ID != post.UserID {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "This post doesnot belongs to you.",
 			})
 			return
 		}
