@@ -79,12 +79,68 @@ func CreatePost() gin.HandlerFunc {
 
 func UpdatePost() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var post = &models.Post{}
+		if err := c.ShouldBindJSON(&post); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		postIdStr := c.Param("id")
+		postID, err := strconv.ParseUint(postIdStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
 
+		if err := database.DB.Where("id = ?", postID).First(&post).Error; err != nil {
+			c.JSON(http.StatusNoContent, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		if err := database.DB.Save(&post).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Post updated successfully.",
+			"data":    post,
+		})
 	}
 }
 
 func DeletePost() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		var post = &models.Post{}
+		postIdStr := c.Param("id")
+		PostID, err := strconv.ParseUint(postIdStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if err := database.DB.Where("id = ?", PostID).Find(&post).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if err := database.DB.Delete(&post).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Post deleted successfully.",
+		})
 	}
 }
